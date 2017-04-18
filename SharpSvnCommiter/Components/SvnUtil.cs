@@ -9,19 +9,22 @@ namespace SharpSvnCommiter.Components
 {
 	public class SvnUtil
 	{
-		private IList<string> GetLatestCommitMessages(Uri repository, int count = 10) {
+		private IList<string> GetLatestCommitMessages(Uri repository, int start) {
 			using (var client = new SvnClient()) {
 				System.Collections.ObjectModel.Collection<SvnLogEventArgs> logEntries;
-				var args = new SvnLogArgs() {
-					Limit = count
-				};
-				client.GetLog(repository, args, out logEntries);
-				return logEntries.Select(log => log.LogMessage).ToList();
+				//var args = new SvnLogArgs() {
+				//	Start = start
+				//};
+				DateTime startDateTime = new DateTime(2017, 03, 20);
+				DateTime endDateTime = DateTime.Now;
+				SvnRevisionRange range = new SvnRevisionRange(new SvnRevision(startDateTime), new SvnRevision(endDateTime));
+				client.GetLog(repository, new SvnLogArgs(range), out logEntries);
+				return logEntries.Where(log => log.LogMessage.Contains("#SD-3606")).Select(log => log.LogMessage).ToList();
 			}
 		}
 
 		public IList<string> GetLogMessages(Uri repository) {
-			return GetLatestCommitMessages(repository);
+			return GetLatestCommitMessages(repository, 120640);
 		}
 	}
 }
